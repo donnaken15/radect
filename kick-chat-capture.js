@@ -3,8 +3,12 @@
 // based on what i had to do to get yt-dl working for it
 
 var _break = false;
-var cursor_preview;
-var log = [];
+var _continue = false;
+var timeout = 5000;
+if (!_continue) {
+	var cursor_preview;
+	var log = [];
+}
 var username = '';
 const delay = ms => new Promise(res => setTimeout(res, ms));
 (async function() {
@@ -12,19 +16,21 @@ const delay = ms => new Promise(res => setTimeout(res, ms));
 	var start_time = new Date(user.chatroom.created_at);
 	console.log(user);
 	var current_time = new Date();
-	var cursor = current_time;
-	var latest_msg = (await (await fetch('https://kick.com/api/v2/channels/'+user.chatroom.chatable_id+'/messages')).json());
-	if (latest_msg.data.messages.length > 0) {
-		cursor = new Date(latest_msg.data.messages[latest_msg.data.messages.length-1].created_at);
-		console.log(cursor);
-		latest_msg.data.messages.forEach(
-			msg => {
-				console.log(msg);
-				if (!log.find(x => x.id === msg.id))
-					log.push(msg);
-			}
-		);
-		console.log(latest_msg);
+	var cursor = _continue ? cursor_preview : current_time;
+	if (!_continue) {
+		var latest_msg = (await (await fetch('https://kick.com/api/v2/channels/'+user.chatroom.chatable_id+'/messages')).json());
+		if (latest_msg.data.messages.length > 0) {
+			cursor = new Date(latest_msg.data.messages[latest_msg.data.messages.length-1].created_at);
+			console.log(cursor);
+			latest_msg.data.messages.forEach(
+				msg => {
+					console.log(msg);
+					if (!log.find(x => x.id === msg.id))
+						log.push(msg);
+				}
+			);
+			console.log(latest_msg);
+		}
 	}
 	for (; cursor > start_time;) {
 		if (_break)
@@ -55,7 +61,7 @@ const delay = ms => new Promise(res => setTimeout(res, ms));
 			cursor = new Date(cursor.getTime() - 60000)
 		} catch {
 			//console.error('rate limited??!?!! >:( '+obj.status.code);
-			await delay(5000);
+			await delay(timeout);
 		}
 	}
 	console.log('done');
