@@ -2,23 +2,31 @@
 // i can imagine CORS not allowing it anywhere else
 // based on what i had to do to get yt-dl working for it
 
+// watch list:
+// log[log.length-1].content
+// cursor_preview
+// log
+// JSON.stringify(log)
+
 var _break = false;
 var _continue = false;
+var interval = 200;
 var timeout = 5000;
 if (!_continue) {
 	var cursor_preview;
 	var log = [];
 }
 var username = '';
+const endpoint = 'https://kick.com/api/v2/channels/';
 const delay = ms => new Promise(res => setTimeout(res, ms));
 (async function() {
-	var user = await (await fetch('https://kick.com/api/v2/channels/'+username)).json();
+	var user = await (await fetch(endpoint+username)).json();
 	var start_time = new Date(user.chatroom.created_at);
 	console.log(user);
 	var current_time = new Date();
 	var cursor = _continue ? cursor_preview : current_time;
 	if (!_continue) {
-		var latest_msg = (await (await fetch('https://kick.com/api/v2/channels/'+user.chatroom.chatable_id+'/messages')).json());
+		var latest_msg = (await (await fetch(endpoint+user.chatroom.chatable_id+'/messages')).json());
 		if (latest_msg.data.messages.length > 0) {
 			cursor = new Date(latest_msg.data.messages[latest_msg.data.messages.length-1].created_at);
 			console.log(cursor);
@@ -57,7 +65,7 @@ const delay = ms => new Promise(res => setTimeout(res, ms));
 			}
 			else
 				console.error(obj);
-			await delay(200);
+			await delay(interval);
 			cursor = new Date(cursor.getTime() - 60000)
 		} catch {
 			//console.error('rate limited??!?!! >:( '+obj.status.code);
