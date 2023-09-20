@@ -31,7 +31,8 @@ function t(o) { return o.simpleText; }
 const fs = require('fs');
 const fsopt = {encoding:'utf8', flag:'r'};
 const badgelist = {
-	"moderator":	e('96') + "M"
+	"moderator":	e('96') + "M",
+	"broadcaster":	e('91') + "\u25BA"
 };
 
 console.log(e(0));
