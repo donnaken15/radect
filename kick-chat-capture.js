@@ -1,6 +1,7 @@
 // only tested on site in devtools console
 // i can imagine CORS not allowing it anywhere else
 // based on what i had to do to get yt-dl working for it
+// got CORS error after 2 days of chats from capturing one user's chat
 
 // watch list:
 // log[log.length-1].content
