@@ -40,6 +40,7 @@ JSON.parse(fs.readFileSync(process.argv[2], fsopt)).sort((a, b) => {
 	return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
 }).forEach((data) => {
 	var ts = new Date(data.created_at);
+	ts.setYear(ts.getFullYear() - 1); // wtf
 	var userColor = 97;
 	//console.log(data);
 	var userName = "";
@@ -78,7 +79,7 @@ JSON.parse(fs.readFileSync(process.argv[2], fsopt)).sort((a, b) => {
 		}
 		badges += e(0)+' ';
 	}
-	badges = "".padStart(2-badgeCount) + badges;
+	badges = " ".repeat(2-badgeCount) + badges;
 	console.log(e(95)+DateFormat(ts),
 				badges+e(userColor)+userName+e(0),
 				e(37)+data.content);
