@@ -1,5 +1,4 @@
 
-
 {
 	var argv = process.argv;
 	if (argv.length <= 2) {
@@ -9,14 +8,9 @@
 	}
 }
 
-const colors = true;
-function e(c) { return colors ? "\x1b["+c+"m" : ""; }
-const fsopt = {encoding:'utf8', flag:'r'};
-const sep = "/\\"[(plat === "win32")*1];
-
 const inspect = require('util').inspect;
 var readFile;
-var get_file_args, TimeFormat, DateFormat, pad2, plat, t;
+var get_file_args, TimeFormat, DateFormat, pad2, plat, t, sep;
 {
 	var fs = require('fs');
 	[readFile] = [fs.readFileSync];
@@ -27,7 +21,8 @@ var get_file_args, TimeFormat, DateFormat, pad2, plat, t;
 		DateFormat,
 		pad2,
 		plat,
-		t
+		t,
+		sep
 	]
 		=
 	[
@@ -36,9 +31,18 @@ var get_file_args, TimeFormat, DateFormat, pad2, plat, t;
 		util.DateFormat,
 		util.pad2,
 		util.plat,
-		util.t
+		util.t,
+		util.sep
 	];
 }
+
+const colors = true;
+function e(c) { return colors ? "\x1b["+c+"m" : ""; }
+const fsopt = {encoding:'utf8', flag:'r'};
+
+try {
+	JSON = require("json5"); // bun
+} catch {}
 
 const imposters=JSON.parse(readFile(__dirname+sep+"imposters.json", fsopt));
 const sus = {
@@ -47,14 +51,19 @@ const sus = {
 };
 var tz = new Date().getTimezoneOffset();
 
-console.log(e(0));
+process.stdout.write(e(0));
 
 var files = get_file_args(process.argv.slice(2));
 for (var i = 0; i < files.length; i++)
 {
 	if (files.length > 1)
 		console.log("\n"+files[i]+":");
-	readFile(files[i], fsopt).split('\n').forEach(
+	var file;
+	if (/^https?:/i.test(files[i]))
+		file = await (await fetch(files[i])).text();
+	else
+		file = readFile(files[i], fsopt);
+	file.split('\n').forEach(
 		(line) => {
 			if (line === '')
 				return;
@@ -120,12 +129,16 @@ for (var i = 0; i < files.length; i++)
 									userName = e(91)+"?????"+e(0);
 								var verified = false;
 								var moderator = false;
+								var real = false;
 								{
 									for (var chan in imposters) {
 										if (userName.toLowerCase() == imposters[chan].name.toLowerCase())
 										{
-											if (obj.authorExternalChannelId == imposters[chan].id)
+											if (obj.authorExternalChannelId == chan)
+											{
+												real = true;
 												userColor = imposters[chan].color;
+											}
 											else
 												userColor = 31;
 										}
@@ -139,7 +152,7 @@ for (var i = 0; i < files.length; i++)
 											var key = icon.liveChatAuthorBadgeRenderer.icon.iconType;
 											switch (key) {
 												case "MODERATOR":
-													userColor = 94;
+													userColor = (real ? ("44;"+userColor) : 94);
 													moderator = true;
 													break;
 												case "VERIFIED":
@@ -220,12 +233,16 @@ for (var i = 0; i < files.length; i++)
 								}
 								console.log(e(95)+DateFormat(ts),
 											e(90)+(
-												(root.videoOffsetTimeMsec !== undefined ||
-												tstxt !== null) ? (tstxt ??
-												TimeFormat(parseInt(root.videoOffsetTimeMsec))) : "").padStart(13),
+												(data.videoOffsetTimeMsec !== undefined) ? // why
+												(TimeFormat(parseInt(data.videoOffsetTimeMsec))) :
+												(
+													root.videoOffsetTimeMsec !== undefined ? // why
+													(TimeFormat(parseInt(root.videoOffsetTimeMsec))) :
+													(tstxt ?? "")
+												)).padStart(13),
 											//e(34)+obj.authorExternalChannelId,
 											' '.repeat(p2pad)+prefix2,
-											e(userColor)+userName,
+											e(userColor)+userName+e(0),
 											e(37)+prefix+message.slice(0, -1)+e(0));
 								break;
 							}
@@ -246,5 +263,5 @@ for (var i = 0; i < files.length; i++)
 	if (global.hasOwnProperty("Bun"))
 		Bun.gc(true);
 }
-console.log(e(0));
-console.error(e(0));
+process.stdout.write(e(0));
+process.stderr.write(e(0));

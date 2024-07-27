@@ -17,19 +17,23 @@ export function DateFormat(date) {
 			pad2(date.getSeconds());
 }
 
-var dirname, basename, readdir, exists;
+var dirname, basename, readdir, exists, sep;
 {
 	var path = require('path');
-	[dirname, basename] = [path.dirname, path.basename];
+	[dirname, basename, sep] = [path.dirname, path.basename, path.sep];
 	// there has to be a way to do this where for each key in the array,
 	// get the same name property from the object
 	var fs = require('fs');
 	[readdir, exists] = [fs.readdirSync, fs.existsSync];
 }
-
+export var sep;
 const invpathchars = /[?|<>"]/g;
 const patternfilt = /[.+^${}()[\]\\]/g;
+const domainfilt = /^https?:\/\/+([A-Z0-9]+\.)?[A-Z0-9]+\.[A-Z]+\/+.*$/i;
+const fileptc = /^file:\/\/+([A-Z]:\/)?(\/*[^:*?"<>|]+)$/i;
 const wc = /\*/g;
+
+const include_links = true;
 
 // giga brain wildcard searching
 export function get_file_args(a)
@@ -47,6 +51,20 @@ export function get_file_args(a)
 			// get wildcard pattern, and then retrieve array of files to be read from directory that is referenced
 			var pattern = new RegExp("^"+basename(f).replace(patternfilt, '\\$&').replace(wc,'.*')+"$","i");
 			return readdir(dirname(f)).filter(i => pattern.test(i));
+		}
+		{
+			var remote = domainfilt.test(f);
+			if (remote)
+			{
+				if (!include_links)
+				{
+					console.error(new Error("Remote files are not acceptable here: "+f));
+					return [];
+				}
+				else
+					return f;
+			}
+				// 0 IQ: read file index pages
 		}
 		if (!exists(f))
 		{
