@@ -8,6 +8,9 @@
 	}
 }
 
+try {
+	JSON = require("json5"); // bun
+} catch {}
 const inspect = require('util').inspect;
 var readFile;
 var get_file_args, TimeFormat, DateFormat, pad2, t;

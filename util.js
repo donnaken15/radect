@@ -50,7 +50,8 @@ export function get_file_args(a)
 		{
 			// get wildcard pattern, and then retrieve array of files to be read from directory that is referenced
 			var pattern = new RegExp("^"+basename(f).replace(patternfilt, '\\$&').replace(wc,'.*')+"$","i");
-			return readdir(dirname(f)).filter(i => pattern.test(i));
+			var dir = dirname(f);
+			return readdir(dir).filter(i => pattern.test(i)).map(f => dir+sep+f); // oops, forgot to consider this
 		}
 		{
 			var remote = domainfilt.test(f);

@@ -3,11 +3,14 @@
 	var argv = process.argv;
 	if (argv.length <= 2) {
 		console.log("radect - youtube chat viewer");
-		console.log("node radect_youtube-chat [(...).rechat.json]");
+		console.log("node radect_youtube-chat [(...).live_chat.json]");
 		process.exit(1);
 	}
 }
 
+try {
+	JSON = require("json5"); // bun
+} catch {}
 const inspect = require('util').inspect;
 var readFile;
 var get_file_args, TimeFormat, DateFormat, pad2, plat, t, sep;
@@ -39,10 +42,6 @@ var get_file_args, TimeFormat, DateFormat, pad2, plat, t, sep;
 const colors = true;
 function e(c) { return colors ? "\x1b["+c+"m" : ""; }
 const fsopt = {encoding:'utf8', flag:'r'};
-
-try {
-	JSON = require("json5"); // bun
-} catch {}
 
 const imposters=JSON.parse(readFile(__dirname+sep+"imposters.json", fsopt));
 const sus = {
